@@ -1,0 +1,40 @@
+<launch>
+    <!-- Test configuration parameters -->
+    <arg name="timeout" default="10.0"/>
+    <arg name="test_duration" default="15.0"/>
+
+    <!-- Launch the system under test -->
+    <include file="$(find ros1_integration_testing)/launch/image_processing_system.launch">
+        <arg name="publish_rate" value="10.0"/>
+    </include>
+
+    <!-- Verify image publisher is publishing -->
+    <test name="test_image_publisher"
+          test-name="test_image_publisher"
+          pkg="rostest"
+          type="publishtest"
+          time-limit="$(arg test_duration)">
+        <rosparam subst_value="true">
+        topics:
+        - name: /camera/image_raw
+          timeout: $(arg timeout)
+          negative: false
+        </rosparam>
+    </test>
+
+    <!-- Test 2: Verify image processor is publishing -->
+    <test name="test_image_processor"
+          test-name="test_image_processor"
+          pkg="rostest"
+          type="publishtest"
+          time-limit="$(arg test_duration)">
+        <rosparam subst_value="true">
+        topics:
+        - name: /processed/edges
+          timeout: $(arg timeout)
+          negative: false
+        </rosparam>
+    </test>
+
+
+</launch>

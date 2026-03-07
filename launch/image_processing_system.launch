@@ -1,0 +1,23 @@
+<launch>
+    <!-- Parameters -->
+    <arg name="publish_rate" default="10.0"/>
+    <arg name="image_width" default="640"/>
+    <arg name="image_height" default="480"/>
+
+    <!-- Image Publisher Node -->
+    <node pkg="ros1_integration_testing" type="image_publisher.py" name="image_publisher" output="screen">
+        <param name="publish_rate" value="$(arg publish_rate)"/>
+        <param name="image_width" value="$(arg image_width)"/>
+        <param name="image_height" value="$(arg image_height)"/>
+    </node>
+
+    <!-- Image Processor Node -->
+    <node pkg="ros1_integration_testing" type="image_processor.py" name="image_processor" output="screen">
+        <param name="canny_threshold1" value="50"/>
+        <param name="canny_threshold2" value="150"/>
+    </node>
+
+    <!-- Result Monitor Node -->
+    <node pkg="ros1_integration_testing" type="result_monitor.py" name="result_monitor" output="screen"/>
+
+</launch>
