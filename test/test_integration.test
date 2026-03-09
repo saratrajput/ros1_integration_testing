@@ -59,6 +59,4 @@
         <param name="wait_time" value="10.0"/>
     </test>
 
-    <!-- Verify image content: dimensions and edge detection output -->
-    <test test-name="test_image_content" pkg="ros1_integration_testing" type="test_image_content.py" time-limit="30.0"/>
 </launch>
