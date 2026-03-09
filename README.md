@@ -25,13 +25,13 @@ source devel/setup.sh
 
 ## Running Tests
 
-Run all integration tests with:
+Run the integration test with:
 
 ```bash
 catkin_make run_tests
 ```
 
-You can also run an individual test using `rostest` directly, for example:
+Or run it directly with `rostest`:
 
 ```bash
 rostest ros1_integration_testing test_image_processing.test
