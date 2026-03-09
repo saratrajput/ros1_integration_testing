@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+import os
+
 import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
-import numpy as np
+import cv2
 
 class ImagePublisher:
     def __init__(self):
@@ -12,38 +14,23 @@ class ImagePublisher:
         self.bridge = CvBridge()
         self.pub = rospy.Publisher('/camera/image_raw', Image, queue_size=10)
 
-        # Get parameters
         self.rate = rospy.get_param('~publish_rate', 10.0)
-        self.width = rospy.get_param('~image_width', 640)
-        self.height = rospy.get_param('~image_height', 480)
 
-        rospy.loginfo(f"Image publisher initialized: {self.width}x{self.height} @ {self.rate}Hz")
+        # Load the dog image
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        image_path = os.path.join(script_dir, 'dog.jpeg')
+        self.image = cv2.imread(image_path)
+        if self.image is None:
+            rospy.logfatal(f"Failed to load image: {image_path}")
+            raise RuntimeError(f"Failed to load image: {image_path}")
 
-    def create_dummy_image(self):
-        """Create a simple dummy image with a moving pattern"""
-        t = rospy.Time.now().to_sec()
-
-        # Create a gradient pattern that changes over time
-        x = np.linspace(0, 2*np.pi, self.width)
-        y = np.linspace(0, 2*np.pi, self.height)
-        X, Y = np.meshgrid(x, y)
-
-        # Moving wave pattern
-        pattern = np.sin(X + t) * np.cos(Y + t)
-        image = ((pattern + 1) * 127.5).astype(np.uint8)
-
-        # Convert to 3-channel BGR image
-        image_bgr = np.stack([image, image, image], axis=2)
-
-        return image_bgr
+        rospy.loginfo(f"Image publisher initialized with {image_path} @ {self.rate}Hz")
 
     def run(self):
         rate = rospy.Rate(self.rate)
 
         while not rospy.is_shutdown():
-            # Create and publish dummy image
-            image = self.create_dummy_image()
-            msg = self.bridge.cv2_to_imgmsg(image, encoding="bgr8")
+            msg = self.bridge.cv2_to_imgmsg(self.image, encoding="bgr8")
             msg.header.stamp = rospy.Time.now()
             msg.header.frame_id = "camera_frame"
 
