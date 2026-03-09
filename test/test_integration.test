@@ -1,0 +1,64 @@
+<launch>
+    <include file="$(find ros1_integration_testing)/launch/image_processing_system.launch">
+        <arg name="publish_rate" value="10.0"/>
+    </include>
+
+    <!-- Verify expected topics are advertised with correct types -->
+    <test test-name="advertisetest_topics" pkg="rostest" type="advertisetest" name="advertisetest_topics" time-limit="10.0">
+        <rosparam>
+            topics:
+              - name: /camera/image_raw
+                type: sensor_msgs/Image
+                timeout: 5.0
+              - name: /processed/edges
+                type: sensor_msgs/Image
+                timeout: 5.0
+        </rosparam>
+    </test>
+
+    <!-- Verify image publisher is publishing -->
+    <test name="test_image_publisher"
+          test-name="test_image_publisher"
+          pkg="rostest"
+          type="publishtest"
+          time-limit="15.0">
+        <rosparam>
+        topics:
+        - name: /camera/image_raw
+          timeout: 10.0
+          negative: false
+        </rosparam>
+    </test>
+
+    <!-- Verify image_publisher publishes at ~10 Hz -->
+    <param name="hztest_image_raw/topic" value="/camera/image_raw"/>
+    <param name="hztest_image_raw/hz" value="10.0"/>
+    <param name="hztest_image_raw/hzerror" value="2.0"/>
+    <param name="hztest_image_raw/test_duration" value="5.0"/>
+    <test test-name="hztest_image_raw" pkg="rostest" type="hztest" name="hztest_image_raw" time-limit="15.0"/>
+
+    <!-- Verify image_processor output rate matches input -->
+    <param name="hztest_edges/topic" value="/processed/edges"/>
+    <param name="hztest_edges/hz" value="10.0"/>
+    <param name="hztest_edges/hzerror" value="2.0"/>
+    <param name="hztest_edges/test_duration" value="5.0"/>
+    <test test-name="hztest_edges" pkg="rostest" type="hztest" name="hztest_edges" time-limit="15.0"/>
+
+    <!-- Check that publish_rate parameter exists -->
+    <test test-name="paramtest_rate_exists" pkg="rostest" type="paramtest" name="paramtest_rate_exists" time-limit="15.0">
+        <param name="param_name_target" value="/image_publisher/publish_rate"/>
+        <param name="test_duration" value="5.0"/>
+        <param name="wait_time" value="10.0"/>
+    </test>
+
+    <!-- Check that image_width parameter has expected value -->
+    <test test-name="paramtest_width_value" pkg="rostest" type="paramtest" name="paramtest_width_value" time-limit="15.0">
+        <param name="param_name_target" value="/image_publisher/image_width"/>
+        <param name="param_value_expected" value="640"/>
+        <param name="test_duration" value="5.0"/>
+        <param name="wait_time" value="10.0"/>
+    </test>
+
+    <!-- Verify image content: dimensions and edge detection output -->
+    <test test-name="test_image_content" pkg="ros1_integration_testing" type="test_image_content.py" time-limit="30.0"/>
+</launch>
